@@ -1,0 +1,55 @@
+<resources>
+    <!-- String of app -->
+    <string name="app_name">Tareas Mc 256</string>
+    <string name="bienvenida">!Hola Usuario¡</string>
+    <string name="dia">El Dia de Hoy es miercoles</string>
+    <string name="noWorks">¡Yupi! no tienes Tareas </string>
+    <string name="descripcion">Escribe tu Nombre</string>
+    <string name="descripcion2">Y añade una imagen de usuario</string>
+    <string name="una_imagen">Imagen</string>
+    <string name="nombre">Tu nombre</string>
+    <string name="image">Seleccionar imagen</string>
+    <string name="registrar">Registrar Usuario</string>
+    <string name="add_titulo">Añade un titulo</string>
+    <string name="add_description">Añade una descripción</string>
+    <string name="add_hora">Selecciona una Hora</string>
+    <string name="add_desinado">Selecciona el tiempo designado</string>
+    <string name="add_hora_select">Hora</string>
+    <string name="add_designado_select">Designado</string>
+    <string name="agregar">agregar tarea</string>
+    <string name="aceptar">Aceptar</string>
+    <string name="botonDesignadoN">-</string>
+    <string name="botonDesigadoP">+</string>
+    <string name="mensajeViewDesignado">Selecciona Tiempo para el designado</string>
+    <string name="designadoEditText">0</string>
+    <string name="tituloTareaDialog">Sacar la ropa\na tender</string>
+    <string name="descripciontareasDialog">sacar la ropa a tender es muy importante crack</string>
+    <string name="fechaOpcionTareaDialog">fecha que se establece 02/04/2020</string>
+    <string name="designadOpcionTareasDialog">tiempo Designado\n10 mins</string>
+    <string name="horaOpcionTareasDIalog">Hora establecida 10:20</string>
+    <string name="addTaskTitulo">Agrega Una Tarea A la lista </string>
+    <string name="editarTareaTitulo">Edita tu tarea</string>
+    <string name="editarTitulo">Editar Titulo</string>
+    <string name="editarDescripcion">Editar tu Descripcion</string>
+    <string name="editarTarea">Editar Tarea</string>
+
+    <string name="editarDesignado">Editar Tiempo Designado</string>
+    <string name="editarHora">Editar Hora</string>
+
+    <string name="eliminarTextoItem">Eliminar</string>
+    <string name="editarTextoItem">Editar</string>
+
+    <string name="open_nav">open menu</string>
+    <string name="close_nav">close menu</string>
+
+    <string name="bienvenida2">¿Necesitas algo?</string>
+    <string name="home">Inicio</string>
+    <string name="editProfile">Editar Perfil</string>
+
+    <string name="editTitleUser">Escribe tu nuevo nombre</string>
+    <string name="editSubTitleUser">Y selecciona una nueva imagen</string>
+
+    <string name="sobreLaApp">Sobre la app</string>
+
+
+</resources>

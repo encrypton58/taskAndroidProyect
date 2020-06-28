@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#00bcd4</color>
+    <color name="colorPrimaryDark">#008ba3</color>
+    <color name="white">#fff</color>
+    <color name="colorAccent">#e91e63</color>
+    <color name="whiteClaro">#f1f1f1</color>
+    <color name="negro">#000000</color>
+    <color name="oscurito">#1e1d25</color>
+    <color name="masClarito">#403E3E</color>
+</resources>
