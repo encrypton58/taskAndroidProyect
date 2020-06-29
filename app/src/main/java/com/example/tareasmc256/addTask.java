@@ -3,12 +3,15 @@ package com.example.tareasmc256;
 import androidx.appcompat.app.AppCompatActivity;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.database.SQLException;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -26,7 +29,6 @@ public class addTask extends AppCompatActivity implements dialogDesignedTime.int
     EditText titleTask, descriptionTask;
     Button pickTime, pickDesigned, addTask;
     TextView showTime, showDesigned;
-
     //context
     Context context;
 
@@ -117,8 +119,8 @@ public class addTask extends AppCompatActivity implements dialogDesignedTime.int
             SharedPreferences.Editor editor = sp.edit();
             editor.putBoolean("entro",true);
             editor.apply();
-            Intent intent = new Intent(getApplicationContext(),MainActivity.class);
-            startActivity(intent);
+            Intent i = new Intent(getApplicationContext(), MainActivity.class);
+            startActivity(i);
         }
     }
 
@@ -249,4 +251,5 @@ public class addTask extends AppCompatActivity implements dialogDesignedTime.int
         super.onBackPressed();
         finish();
     }
+
 }

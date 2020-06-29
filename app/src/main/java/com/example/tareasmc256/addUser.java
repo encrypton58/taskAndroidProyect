@@ -8,21 +8,26 @@ import androidx.core.graphics.drawable.RoundedBitmapDrawable;
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.SQLException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.google.android.material.snackbar.Snackbar;
 
@@ -37,12 +42,14 @@ public class addUser extends AppCompatActivity {
     Button addUser,selectImage;
     RelativeLayout cons;
     ImageView imageUser, imagenData;
+    ProgressDialog alertProgress;
     //      context
     Context context;
     //      variables primitives
     final int REQUEST_GALLERY = 999;
     boolean imageIsSet = false;
     //      intance of class
+    sqlite con;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,12 +65,10 @@ public class addUser extends AppCompatActivity {
         imageUser = findViewById(R.id.imageUser);
         imagenData = findViewById(R.id.imageP);
         imagenData.setVisibility(View.INVISIBLE);
-
         //instance of class
-
-
-
-
+        con = new sqlite(getApplicationContext());
+        //configuration widgets
+        alertProgress = new ProgressDialog(addUser.this);
         selectImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -74,11 +79,14 @@ public class addUser extends AppCompatActivity {
         addUser.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                sqlite con = new sqlite(getApplicationContext());
                 if (!checarInput() && imageIsSet) {
-                    con.insertDataUsuarios(editText.getText().toString(), imageViewToByte(imagenData));
-                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                    startActivity(intent);
+
+                    alertProgress.show();
+                    alertProgress.setContentView(R.layout.progress_layout);
+                    alertProgress.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
+                    async a = new async();
+                    a.execute();
                 } else if (!imageIsSet) {
                     AlertDialog.Builder buider = new AlertDialog.Builder(context);
                     buider.setTitle("Error en imagen");
@@ -193,6 +201,23 @@ public class addUser extends AppCompatActivity {
         super.onBackPressed();
         finish();
 
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    private class async extends AsyncTask<String, Integer, String> {
+
+        @Override
+        protected String doInBackground(String... strings) {
+                con.insertDataUsuarios(editText.getText().toString(), imageViewToByte(imagenData));
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            alertProgress.dismiss();
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            startActivity(intent);
+        }
     }
 
 
