@@ -71,8 +71,8 @@ public class setNavMenu implements NavigationView.OnNavigationItemSelectedListen
         switch(menuItem.getItemId()){
 
             case R.id.editProfile_nav:
-                //Intent i = new Intent(context.getApplicationContext(), editUser.class);
-                //app.startActivity(i);
+                Intent i = new Intent(context.getApplicationContext(), editUser.class);
+                app.startActivity(i);
                 break;
             case R.id.about_nav:
                 Toast.makeText(context, "about nav", Toast.LENGTH_SHORT).show();
