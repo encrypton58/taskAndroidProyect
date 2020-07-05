@@ -7,6 +7,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -26,6 +27,8 @@ public class serviceTimer extends Service {
 
     Bundle datos;
 
+    sqlite sql;
+
     CountDownTimer cdt = null;
 
 
@@ -33,6 +36,7 @@ public class serviceTimer extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        this.sql = new sqlite(this);
         instancia = this;
     }
 
@@ -64,7 +68,7 @@ public class serviceTimer extends Service {
                 if(millisUntilFinished / 60000 == 0){
                     Notification notification = new NotificationCompat.Builder(getApplicationContext(), CHANNEL_ID)
                             .setContentTitle(title)
-                            .setContentText(details + " Timepo de finalizacion: " + millisUntilFinished / 1000 + " mins")
+                            .setContentText(details + " Timepo de finalizacion: " + millisUntilFinished / 1000 + " mins.")
                             .setSmallIcon(R.drawable.icon_close)
                             .setContentIntent(pendingIntent)
                             .build();
@@ -73,16 +77,13 @@ public class serviceTimer extends Service {
                 }else {
                     Notification notification = new NotificationCompat.Builder(getApplicationContext(), CHANNEL_ID)
                             .setContentTitle(title)
-                            .setContentText(details + " Timepo de finalizacion: " + millisUntilFinished / 60000 + " mins")
+                            .setContentText(details + " Timepo de finalizacion: " + millisUntilFinished / 60000 + " seg.")
                             .setSmallIcon(R.drawable.icon_close)
                             .setContentIntent(pendingIntent)
                             .build();
 
                     startForeground(1, notification);
                 }
-
-
-
 
             }
 
@@ -92,6 +93,20 @@ public class serviceTimer extends Service {
                 cdt.cancel();
                 createNotification("has finalizado " + datos.getString("title"),
                         "Se ha finalizado el tiempo designado", (int) (Math.random()*255));
+
+                Cursor c = sql.querySpecialTareas(datos.getString("title"));
+                if(c.moveToFirst()){
+                    String titulo = c.getString(1);
+                    String hora = c.getInt(2) + ":" + c.getInt(3);
+                    String des = c.getString(4);
+                    String fecha = c.getString(5);
+                    String designado = c.getString(6);
+                    sql.insertDataDoneTareas(titulo,hora,des,fecha,designado);
+                    sql.deleteTareas(c.getInt(0));
+                    new MainActivity().deleteWorkManagerFromTask(String.valueOf(c.getInt(0)), c.getString(1));
+
+                }
+
                 stopForeground(true);
                 stopSelf();
 

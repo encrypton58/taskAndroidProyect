@@ -2,7 +2,7 @@ package com.example.tareasmc256;
 
 public class tarea {
 
-    private String titulo, descripcion, fecha,horasDesignadas;
+    private String titulo, descripcion, fecha,horasDesignadas, horaStr;
     private int hora , minuto;
     private int id;
 
@@ -20,11 +20,22 @@ public class tarea {
         this.horasDesignadas = horas_designadas;
     }
 
+    public tarea(int id, String titulo, String hora, String descripcion, String fecha, String horasDesignadas){
+        this.id = id;
+        this.titulo = titulo;
+        this.horaStr = hora;
+        this.descripcion = descripcion;
+        this.fecha = fecha;
+        this.horasDesignadas = horasDesignadas;
+    }
+
     public int getId(){return id;}
 
     public String getTitulo() {
         return titulo;
     }
+
+    public String getHoraStr(){ return horaStr;}
 
     public int getHora() {
         return hora;

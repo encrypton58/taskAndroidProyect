@@ -54,10 +54,12 @@ public class workerManager extends Worker {
         in.putExtra("time", time);
         in.putExtra("title", title);
         in.putExtra("details",details);
-        context.startService(in);
-
-        createNotification(title,details,id);
         createNotificationChannel();
+
+        if(serviceTimer.instancia == null) {
+            createNotification(title, details, id);
+            context.startService(in);
+        }
 
         return Result.success();
     }

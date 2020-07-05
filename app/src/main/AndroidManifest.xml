@@ -11,7 +11,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme.NoActionBar">
-        <activity android:name=".editUser"></activity>
+        <activity android:name=".taskDone"></activity>
+        <activity android:name=".editUser" />
         <activity android:name=".editTasks" />
         <activity android:name=".addTask" />
         <activity android:name=".addUser" />

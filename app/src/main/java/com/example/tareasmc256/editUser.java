@@ -14,6 +14,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -22,12 +23,14 @@ import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.io.ByteArrayOutputStream;
@@ -35,7 +38,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Objects;
 
-public class editUser extends AppCompatActivity {
+public class editUser extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     //widgets
     EditText inputNewData;
@@ -50,6 +53,7 @@ public class editUser extends AppCompatActivity {
     boolean imageIsSet = false;
     //      intance of class
     sqlite con;
+    setNavMenu nav;
     //Strings
     String user;
     //Rouunded drawable
@@ -74,7 +78,13 @@ public class editUser extends AppCompatActivity {
         newDataImage.setVisibility(View.INVISIBLE);
         alertProgress = new ProgressDialog(editUser.this);
 
-        initialMessage();
+        nav = new setNavMenu(context,this,editUser.this, R.id.editProfile_nav);
+
+        SharedPreferences sp = getSharedPreferences("notShowMore", Context.MODE_PRIVATE);
+        if(!sp.getBoolean("notMoreShowDialog", false)){
+            initialMessage();
+        }
+
 
         openGallery.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -134,6 +144,15 @@ public class editUser extends AppCompatActivity {
         build.setNegativeButton("No volver a mostrar", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
+
+                //establece que no se muestre el mensaje del sistema de soporte para intruciones
+                // share = notShowMore
+                //varible = notMoreShowDialog = true
+
+                SharedPreferences sp = getSharedPreferences("notShowMore", Context.MODE_PRIVATE);
+                SharedPreferences.Editor edit = sp.edit();
+                edit.putBoolean("notMoreShowDialog", true);
+                edit.apply();
                 dialogInterface.dismiss();
             }
         });
@@ -219,6 +238,12 @@ public class editUser extends AppCompatActivity {
         super.onBackPressed();
         finish();
 
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+        nav.onNavigationItemSelected(menuItem);
+        return true;
     }
 
     @SuppressLint("StaticFieldLeak")

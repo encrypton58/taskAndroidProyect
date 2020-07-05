@@ -6,15 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".addTask">
 
-    <!--
-    EditText
-    android:drawableStart="@drawable/edit_description"
-    EditText
-    android:drawableStart="@drawable/edit_title"
-    imageView
-     app:srcCompat="@drawable/bitmap"
-    -->
-
     <EditText
         android:id="@+id/descriptionTask"
         android:layout_width="335dp"

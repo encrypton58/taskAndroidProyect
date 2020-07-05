@@ -18,9 +18,10 @@
             android:icon="@drawable/icon_et"
             android:title="@string/sobreLaApp" />
         <item
-            android:id="@+id/item_navigation_drawer_drafts"
+            android:id="@+id/nav_tasksDo"
             android:icon="@drawable/icon_et"
-            android:title="Drafts" />
+            android:title="@string/tareasRealizadas"
+            />
     </group>
 
 

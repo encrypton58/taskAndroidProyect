@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/drawaverLayout"
+    tools:context=".taskDone">
+
+    <com.google.android.material.navigation.NavigationView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:id="@+id/nav_view"
+        app:headerLayout="@layout/header"
+        app:menu="@menu/drawaver_menu"
+        android:layout_gravity="start"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginStart="0dp"
+            android:layout_marginTop="-3dp"
+            android:layout_marginEnd="0dp"
+            android:background="?attr/colorPrimary"
+            android:minHeight="?attr/actionBarSize"
+            android:theme="?attr/actionBarTheme"
+            app:navigationIcon="@drawable/icon_meu_items" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerTasksDone"
+            android:layout_width="match_parent"
+            android:layout_height="579dp"
+            android:layout_above="@+id/clearTaskDone"
+            android:layout_below="@+id/toolbar"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginStart="0dp"
+            android:layout_marginTop="3dp"
+            android:layout_marginEnd="0dp"
+            android:layout_marginBottom="35dp" />
+
+        <Button
+            android:id="@+id/clearTaskDone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginStart="109dp"
+            android:layout_marginEnd="109dp"
+            android:layout_marginBottom="17dp"
+            android:text="eliminar todas las Tareas" />
+
+        <TextView
+            android:id="@+id/noTask"
+            android:layout_width="236dp"
+            android:layout_height="46dp"
+            android:layout_alignBottom="@+id/toolbar"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginStart="84dp"
+            android:layout_marginTop="85dp"
+            android:layout_marginEnd="84dp"
+            android:layout_marginBottom="-78dp"
+            android:gravity="center"
+            android:text="no hay tareas realizadas"
+            android:textColor="@color/negro"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+
+    </RelativeLayout>
+
+</androidx.drawerlayout.widget.DrawerLayout>

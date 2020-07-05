@@ -28,25 +28,28 @@ public class addTask extends AppCompatActivity implements dialogDesignedTime.int
     //widgets
     EditText titleTask, descriptionTask;
     Button pickTime, pickDesigned, addTask;
-    TextView showTime, showDesigned;
+    TextView showTime, showDesigned, title;
     //context
     Context context;
 
     //Strings
-    String titleTaskString, descriptionTaskString;
+    String titleTaskString = "empty", descriptionTaskString = "empty";
     String designedString = "empty";
-    int hourInteger = 0;
-    int minuteInteger = 0;
+    int hourInteger = -1;
+    int minuteInteger = -1;
     String dateFormat;
-
     //boolean variables
     boolean isSetTomorrow;
+    //instace of class
+    sqlite con;
+    Calendar c;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_task);
 
+        //hooks UI
         titleTask = findViewById(R.id.titleTask);
         descriptionTask = findViewById(R.id.descriptionTask);
         pickTime = findViewById(R.id.pickTime);
@@ -54,197 +57,152 @@ public class addTask extends AppCompatActivity implements dialogDesignedTime.int
         addTask = findViewById(R.id.addTask);
         showTime = findViewById(R.id.showTime);
         showDesigned = findViewById(R.id.showDesigned);
-
+        title = findViewById(R.id.title2);
+        //inicialize variable
         context = this;
-
-        //SharedPreferences sp = getSharedPreferences("ingreso", Context.MODE_PRIVATE);
-        //if(!sp.getBoolean("InputLogin", false)){
-
-        //}
-
+        con = new sqlite(context);
+        c = Calendar.getInstance();
+        //set Methods
         pickTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                getTime();
+                timePikerDialog();
             }
         });
 
         addTask.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                checkInputsAndUploadDataBase();
+                uploadDatabase();
             }
         });
         pickDesigned.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new dialogDesignedTime(context, com.example.tareasmc256.addTask.this);
+                new dialogDesignedTime(context, addTask.this);
             }
         });
 
+        title.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(context, "valor de isSetTomorrow : " + isSetTomorrow , Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
-    @SuppressLint("SimpleDateFormat")
-    private void getTime(){
+    // sube la informacion ala base de datos
+    private void uploadDatabase(){
+        if(!checkDataNotEmpty()){
+            setDateFormat();
+            con.insertDataTareas(titleTaskString,hourInteger,minuteInteger,
+                    descriptionTaskString,dateFormat,designedString);
+            startActivity(new Intent(context, MainActivity.class));
+        }
+    }
+
+    //evalua los imputs para que no haya datos sin setear
+    private boolean checkDataNotEmpty(){
+
+        titleTaskString = titleTask.getText().toString();
+        descriptionTaskString = descriptionTask.getText().toString();
+
+        if(titleTask.getText().toString().isEmpty() || descriptionTask.getText().toString().isEmpty() || designedString.equals("empty") || hourInteger == -1){
+            
+            if(titleTask.getText().toString().isEmpty()){
+                new simpleDialogInfo(context, "Error de entrada", "No puedes dejar el titulo de la tarea vacio");
+            }else if(descriptionTask.getText().toString().isEmpty()){
+                new simpleDialogInfo(context, "Error de entrada", "No puedes dejar la descripcion de la tarea Vacia");
+            }else if(hourInteger == -1){
+                new simpleDialogInfo(context, "Error de tiempo", "no puedes dejar la hora de inicio de la tarea vacia");
+            }else if(designedString.equals("empty")){
+                new simpleDialogInfo(context, "Error de tiempo", "no puedes dejar la hora designada de la tarea vacia");
+            }
+            
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    //escoje la hora de inicio de la alarma
+    private void timePikerDialog(){
         Calendar c = Calendar.getInstance();
         final int hourSystem = c.get(Calendar.HOUR_OF_DAY);
         final int minuteSystem = c.get(Calendar.MINUTE);
-        Toast.makeText(context, hourSystem + ":" + minuteSystem, Toast.LENGTH_SHORT).show();
-
-        TimePickerDialog piker = new TimePickerDialog(context, new TimePickerDialog.OnTimeSetListener() {
-            @SuppressLint("SetTextI18n")
+        TimePickerDialog tp = new TimePickerDialog(context, new TimePickerDialog.OnTimeSetListener() {
             @Override
             public void onTimeSet(TimePicker timePicker, int hour, int minute) {
-                showTime.setText("La Hora Seleccionada\nes: " + hour + ":" + minute);
-                if (hour <= hourSystem && minute < minuteSystem){
-                   createDialog(context, "Hora no permitida","Quieres agregar la tarea para mañana a esa hora", true );
-                }
                 hourInteger = hour;
                 minuteInteger = minute;
-
-                Toast.makeText(context, hour + ":" + minute, Toast.LENGTH_SHORT).show();
-
+                SetTomorrowTask(hour,minute, hourSystem, minuteSystem);
+                showTime.setText("la hora selecionada\nes: " + hourInteger + ":" + minuteInteger);
             }
         }, hourSystem,minuteSystem,false);
-        piker.show();
+        tp.show();
+
     }
 
-    private void checkInputsAndUploadDataBase(){
-        taskAboutTask();
-        checkAsignateTommorrow();
-        if(!getTextFromEditText() && !getDataFromButtons()){
-            sqlite con = new sqlite(getApplicationContext());
-            con.insertDataTareas(titleTaskString, hourInteger,minuteInteger,descriptionTaskString, dateFormat,designedString);
-            SharedPreferences sp = getSharedPreferences("ingreso", Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = sp.edit();
-            editor.putBoolean("entro",true);
-            editor.apply();
-            Intent i = new Intent(getApplicationContext(), MainActivity.class);
-            startActivity(i);
-        }
-    }
-
-    boolean error;
-
-    private boolean getTextFromEditText(){
-
-        if(titleTask.getText().toString().equals("") || descriptionTask.getText().toString().equals("")){
-            createDialog(context,"Error", "No puedes Dejar Vacio Los cuadros de texto", false);
-            error = true;
+    private void SetTomorrowTask(int hour, int minute, int hourSystem, int minuteSystem){
+        if(hour <= hourSystem && minute <= minuteSystem){
+            AlertDialog.Builder build = new AlertDialog.Builder(context)
+                    .setTitle("Aviso")
+                    .setMessage("la alarma se establecera a esa hora mañana")
+                    .setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            isSetTomorrow = true;
+                            dialogInterface.dismiss();
+                        }
+                    })
+                    .setNegativeButton("Denegar", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            isSetTomorrow = false;
+                            dialogInterface.dismiss();
+                            timePikerDialog();
+                        }
+                    });
+            AlertDialog alertDialog = build.create();
+            alertDialog.show();
         }else{
-            titleTaskString = titleTask.getText().toString();
-            descriptionTaskString = descriptionTask.getText().toString();
-            error = false;
-        }
-
-        return error;
-    }
-
-    private void taskAboutTask(){
-        Cursor c = new sqlite(context).queryAllRegistersTareas();
-        while(c.moveToNext()){
-            if(hourInteger == c.getInt(2)){
-                Toast.makeText(context, "Hay una alarma establecida en esa hora", Toast.LENGTH_SHORT).show();
-                int a = c.getInt(3) + Integer.parseInt(c.getString(6));
-                int b = c.getInt(2);
-                if(a >= 60){
-                    a = a - 60;
-                    b = b + 1;
-
-                }
-            }
-            String taskDesigned = c.getString(6);
-            if(taskDesigned.equals(designedString)){
-                createDialog(context,"Error de tiempo", "No puedes crear una tarea al mismo tiempo que otra", false);
-            }
+            Toast.makeText(context, "No se cumple la condicion establecida", Toast.LENGTH_SHORT).show();
         }
     }
 
-    @SuppressLint("SimpleDateFormat")
-    private void checkAsignateTommorrow(){
-        String pattern = "dd-MM-yyyy";
+    //establece la fecha de alarama de la tarea
+    private void setDateFormat(){
+
+        int day;
+        int month = c.get(Calendar.MONTH);
+        int year = c.get(Calendar.YEAR);
+
+        String dayString = "";
+        String mothString = "";
+
         if(isSetTomorrow){
-            Calendar c = Calendar.getInstance();
-            Date date = new Date();
-            date.setDate(c.get(Calendar.DAY_OF_MONTH) + 1 );
-            SimpleDateFormat sp = new SimpleDateFormat(pattern);
-            dateFormat = sp.format(date);
-            SharedPreferences sharedPreferences = getSharedPreferences("setTomorrow", Context.MODE_PRIVATE);
-            SharedPreferences.Editor edit = sharedPreferences.edit();
-            edit.putBoolean("isSetTomorrow", isSetTomorrow);
-            edit.apply();
-            Toast.makeText(context, dateFormat, Toast.LENGTH_SHORT).show();
+            day = c.get(Calendar.DAY_OF_MONTH) + 1;
         }else{
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
-            dateFormat = simpleDateFormat.format(new Date());
+            day = c.get(Calendar.DAY_OF_MONTH);
         }
-    }
 
-    private void createDialog(final Context context, String title, final String message, boolean moreOptions){
-
-        if(moreOptions){
-            AlertDialog.Builder builder = new AlertDialog.Builder(context);
-            builder.setTitle(title);
-            builder.setMessage(message);
-            builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    dialogInterface.dismiss();
-                    getTime();
-                }
-            });
-            builder.setPositiveButton("Si", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    isSetTomorrow = true;
-                    Toast.makeText(context, "Se ha establecido para mañana", Toast.LENGTH_SHORT).show();
-                    dialogInterface.dismiss();
-                }
-            });
-            builder.setCancelable(false);
-            AlertDialog dialog = builder.create();
-            dialog.show();
-
+        if(!(day >= 10)){
+            dayString = "0"+day;
+        }else {
+            dayString = String.valueOf(day);
+        }
+        if(!(month >= 10)){
+            mothString = "0"+ month;
         }else{
-            AlertDialog.Builder buider = new AlertDialog.Builder(context);
-            buider.setTitle(title);
-            buider.setMessage(message);
-            buider.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                }
-            });
-            AlertDialog dialog = buider.create();
-            dialog.show();
+            mothString = String.valueOf(month);
         }
+
+        dateFormat = dayString + "-" + mothString +"-"+ year;
+
 
     }
 
-    private boolean getDataFromButtons(){
-        if(hourInteger == 0 || minuteInteger == 0) {
-            error = true;
-            createDialog(context, "Error", "No puedes Dejar vacio la Hora de inicio ", false);
-        }else{
-            error = false;
-        }
-        if(designedString.equals("empty")){
-            error = true;
-            createDialog(context, "Error", "No puedes dejar vacio el tiempo desginado para la tarea", false);
-        }else{
-            error = false;
-        }
-
-        return error;
-    }
-
-
-    @SuppressLint("SetTextI18n")
-    @Override
-    public void getTime(String time) {
-        showDesigned.setText("el Tiempo designado\nes: " + time + " mins.");
-        designedString = time;
-    }
+    // TODO: overRide methos
 
     @Override
     public void onBackPressed() {
@@ -252,4 +210,9 @@ public class addTask extends AppCompatActivity implements dialogDesignedTime.int
         finish();
     }
 
+    @Override
+    public void getTime(String time) {
+        designedString = time;
+        showDesigned.setText("Tiempo designado\nes: " + designedString + "mins");
+    }
 }

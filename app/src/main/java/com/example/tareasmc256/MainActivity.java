@@ -27,12 +27,11 @@ import android.widget.Toast;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.tapadoo.alerter.Alerter;
-
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
+
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.work.Data;
 import androidx.work.WorkManager;
 
@@ -47,20 +46,22 @@ public class MainActivity extends AppCompatActivity implements swipeTareas.recyc
     ImageView iu;
     FloatingActionButton addTask;
     RelativeLayout constraintLayout;
+    SwipeRefreshLayout swipeRefresh;
     //context
     Context context;
     //String
     String user;
+    String date;
     //recyclerView
     public static List<tarea> task;
     public static recyclerAdapterItems taskAdapter;
     RecyclerView recyclerViewTask;
     //Calendar
-    Calendar calendar = Calendar.getInstance();
     Calendar cal = Calendar.getInstance();
     //class from the project
     setNavMenu nav;
     sqlite sql;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,10 +70,11 @@ public class MainActivity extends AppCompatActivity implements swipeTareas.recyc
         context = this;
         this.sql = new sqlite(context);
         recyclerViewTask = findViewById(R.id.recyclerTarea);
+        swipeRefresh = findViewById(R.id.swipeRefresLayout);
+
         recyclerViewTask.setLayoutManager(new LinearLayoutManager(this));
         taskAdapter = new recyclerAdapterItems(getTareas());
         recyclerViewTask.setAdapter(taskAdapter);
-
 
 
         ItemTouchHelper.SimpleCallback simpleCallback =
@@ -96,12 +98,39 @@ public class MainActivity extends AppCompatActivity implements swipeTareas.recyc
         noWorks = findViewById(R.id.noWorksText);
 
         //implements the nav drawer
-        nav = new setNavMenu(context, this,MainActivity.this);
+        nav = new setNavMenu(context, this,MainActivity.this, R.id.nav_home);
 
         //coding of program in function
         getDataFromUsers();
         getDate();
         displayYupi();
+
+        swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                recyclerViewTask.setLayoutManager(new LinearLayoutManager(context));
+                taskAdapter = new recyclerAdapterItems(getTareas());
+                recyclerViewTask.setAdapter(taskAdapter);
+
+
+                ItemTouchHelper.SimpleCallback simpleCallback =
+                        new swipeTareas(0, ItemTouchHelper.LEFT, MainActivity.this, context);
+
+                new ItemTouchHelper(simpleCallback)
+                        .attachToRecyclerView(recyclerViewTask);
+
+                ItemTouchHelper.SimpleCallback simpleCallbackRight =
+                        new swipeTareas(0, ItemTouchHelper.RIGHT, MainActivity.this, context);
+
+                new ItemTouchHelper(simpleCallbackRight)
+                        .attachToRecyclerView(recyclerViewTask);
+
+                displayYupi();
+
+                swipeRefresh.setRefreshing(false);
+            }
+        });
+
         addTask.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -112,7 +141,10 @@ public class MainActivity extends AppCompatActivity implements swipeTareas.recyc
         iu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //checkDataBase();
+                sql.insertDataDoneTareas("prueba","prueba","prueba","prueba","prueba");
+                nav = null;
+                nav = new setNavMenu(context, MainActivity.this,MainActivity.this, R.id.nav_home);
+               //se usa pa pruebas que necsiten un detionador
             }
         });
 
@@ -154,6 +186,7 @@ public class MainActivity extends AppCompatActivity implements swipeTareas.recyc
         }
     }
 
+    //crea un dialog que se muestra al usuario solo si no hay datos en la bbdd
     public void crearDialog(Context context) {
         AlertDialog.Builder build = new AlertDialog.Builder(context);
         build.setTitle("Hola Nuevo Usuario¡");
@@ -237,13 +270,13 @@ public class MainActivity extends AppCompatActivity implements swipeTareas.recyc
             task.add(new tarea(c.getInt(0), c.getString(1),c.getInt(2), c.getInt(3), c.getString(4)
                     ,c.getString(5), c.getString(6) ));
             checkDataBase(c.getInt(0), c.getString(1), c.getInt(2),
-                    c.getInt(3), c.getString(4), c.getString(6));
+                    c.getInt(3), c.getString(4), c.getString(6), c.getString(5));
 
             while (c.moveToNext()) {
                 task.add(new tarea(c.getInt(0), c.getString(1),c.getInt(2), c.getInt(3), c.getString(4)
                         ,c.getString(5), c.getString(6) ));
                 checkDataBase(c.getInt(0), c.getString(1), c.getInt(2),
-                        c.getInt(3), c.getString(4), c.getString(6));
+                        c.getInt(3), c.getString(4), c.getString(6), c.getString(5));
             }
         } else {
             Toast.makeText(context, "No hay Registros", Toast.LENGTH_SHORT).show();
@@ -254,27 +287,10 @@ public class MainActivity extends AppCompatActivity implements swipeTareas.recyc
 
     //generate a new WorkManager
     @SuppressLint("SimpleDateFormat")
-    private void checkDataBase(int id, String titulo, int hora, int minuto, String descripcion, String tiempoDesignado){
+    private void checkDataBase(int id, String titulo, int hora, int minuto, String descripcion, String tiempoDesignado, String fecha){
 
-        SharedPreferences sp = getSharedPreferences("setTomorrow", Context.MODE_PRIVATE);
-        boolean tomorrow = sp.getBoolean("isSetTomorrow", false);
-        String pattern = "dd-MM-yyyy";
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
-        String dateFormat = simpleDateFormat.format(new Date());
-        if(tomorrow){
-            Cursor c = sql.queryAllRegistersTareas();
-            while(c.moveToNext()){
-                if(!c.getString(5).equals(dateFormat)){
-                    cal.set(Calendar.DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH) + 1);
-                    showAlert(c.getString(1), "Dia " + cal.get(Calendar.DAY_OF_MONTH));
-                }
-            }
-        }else{
-            cal.set(Calendar.DAY_OF_MONTH, Calendar.DAY_OF_MONTH);
-        }
+        setCalendar(fecha,hora, minuto);
 
-        cal.set(Calendar.MINUTE, minuto);
-        cal.set(Calendar.HOUR_OF_DAY, hora);
         String tag = String.valueOf(id);
         long alertTime = cal.getTimeInMillis() - System.currentTimeMillis();
         int random = (int) (Math.random() * 50 + 1);
@@ -304,13 +320,42 @@ public class MainActivity extends AppCompatActivity implements swipeTareas.recyc
     }
 
     public void deleteWorkManagerFromTask(String tag, String title){
-        WorkManager.getInstance(context).cancelAllWorkByTag(tag);
-        Toast.makeText(context, "se ha cancelado con id: " + tag + "\n" +
-                " y con title: " + title , Toast.LENGTH_SHORT).show();
+        WorkManager.getInstance(this).cancelAllWorkByTag(tag);
     }
 
-    // methods override we a override
+    private void setCalendar(String fecha, int hora, int minuto){
 
+        String subStrignDay = fecha.substring(0, 1);
+        String subStrignMonth = fecha.substring(3,4);
+
+        String subStrignyear = fecha.substring(6,10);
+
+        if(subStrignDay.equals("0")){
+            subStrignDay = fecha.substring(1,2);
+        }else{
+            subStrignDay = fecha.substring(0,2);
+        }
+
+        if(subStrignMonth.equals("0")){
+            subStrignMonth = fecha.substring(4,5);
+        }else{
+            subStrignMonth = fecha.substring(3,5);
+        }
+
+        int day = Integer.parseInt(subStrignDay);
+        int month = Integer.parseInt(subStrignMonth);
+        int year = Integer.parseInt(subStrignyear);
+
+        cal.set(Calendar.YEAR, year);
+        cal.set(Calendar.MONTH, month);
+        cal.set(Calendar.DAY_OF_MONTH, day);
+        cal.set(Calendar.HOUR_OF_DAY, hora);
+        cal.set(Calendar.MINUTE, minuto);
+
+    }
+
+
+    // TODO: methods override we a override
     @Override
     public void onBackPressed() {
         if(nav.getDrawerLayout().isDrawerOpen(GravityCompat.START)){
@@ -320,8 +365,6 @@ public class MainActivity extends AppCompatActivity implements swipeTareas.recyc
             finish();
         }
     }
-
-
 
     @Override
     public void onSwipe(RecyclerView.ViewHolder viewHolder, int direction, int position) {
@@ -333,7 +376,9 @@ public class MainActivity extends AppCompatActivity implements swipeTareas.recyc
                 taskAdapter.removeItem(viewHolder.getAdapterPosition());
                 deleteWorkManagerFromTask(id, name);
                 deleteRegisters(name);
-                new serviceTimer().stopBecauseDeleteTask(context);
+                if(serviceTimer.instancia != null){
+                    new serviceTimer().stopBecauseDeleteTask(context);
+                }
                 stopService(new Intent(getApplicationContext(), serviceTimer.class));
                 getTareas();
                 displayYupi();
