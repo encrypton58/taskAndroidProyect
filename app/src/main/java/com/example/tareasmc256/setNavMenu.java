@@ -79,6 +79,8 @@ public class setNavMenu implements NavigationView.OnNavigationItemSelectedListen
     public void changeIconTaskDone(int size){
         if(size > 0){
             menu.findItem(R.id.nav_tasksDo).setActionView(R.layout.notify_layout_task_done);
+        }else{
+            menu.findItem(R.id.nav_tasksDo).setActionView(null);
         }
     }
 
